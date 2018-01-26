@@ -16,6 +16,21 @@
  *   happy refactory :)
  */
 
+const optionsContainFilter = (options, filter) => {
+  let hasFilter = false;
+  options.forEach(option => {
+    if (option.code === filter) hasFilter = true;
+  });
+  return hasFilter;
+}
+
+const resultHasFilters = (result, filters) => {
+  let matchedFilters = filters.filter(filter => {
+    return optionsContainFilter(result.options, filter);
+  });
+  return matchedFilters.length === filters.length;
+}
+
 function filter(results, filters) {
   if (filter.length === 0) return results;
 
@@ -33,18 +48,16 @@ function filter(results, filters) {
   }
 
   for (var i = resultsLength; i--; ) {
-    hasOptions = results[i].options && results[i].options.length > 0; //has.options
+    if (!results[i].options) results[i].options = [];
+    // console.log(filters);
+    hasFilter = resultHasFilters(results[i], filters);
 
     if (results[i].options) {
       for (var k = filterLength; k--; ) {
         // loop through filters
-        var hasFilter = false;
+
         for (var j = results[i].options.length; j--; ) {
-          if (!availableImmediately && !freshGrad) {
-            if (filters[k] == results[i].options[j].code) {
-              hasFilter = true;
-            }
-          } else if (
+          if (
             availableImmediately &&
             results[i].options[j].code === 'AVAILABLE_IMMEDIATELY'
           ) {
@@ -56,10 +69,10 @@ function filter(results, filters) {
             hasFilter = true;
           }
         }
-        hasOptions = hasOptions && hasFilter;
       }
     }
-    if (hasOptions) {
+
+    if (hasFilter) {
       out.unshift(results[i]);
     }
   }
