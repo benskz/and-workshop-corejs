@@ -34,7 +34,6 @@ const resultHasFilters = (result, filters) => {
 function filter(results, filters) {
   if (filter.length === 0) return results;
 
-  var out = [];
   var resultsLength = results.length;
   var filterLength = filters.length;
   var hasOptions;
@@ -47,37 +46,25 @@ function filter(results, filters) {
     freshGrad = true;
   }
 
-  for (var i = resultsLength; i--; ) {
-    if (!results[i].options) results[i].options = [];
+  const filteredResults = results.filter(function(result) {
+    if (!result.options) result.options = [];
     // console.log(filters);
-    hasFilter = resultHasFilters(results[i], filters);
+    hasFilter = resultHasFilters(result, filters);
 
-    if (results[i].options) {
-      for (var k = filterLength; k--; ) {
-        // loop through filters
-
-        for (var j = results[i].options.length; j--; ) {
-          if (
-            availableImmediately &&
-            results[i].options[j].code === 'AVAILABLE_IMMEDIATELY'
-          ) {
-            hasFilter = true;
-          } else if (
-            freshGrad &&
-            results[i].options[j].code === 'FRESH_GRAD'
-          ) {
-            hasFilter = true;
-          }
-        }
+    if (availableImmediately) {
+      if (resultHasFilters(result, ['AVAILABLE_IMMEDIATELY'])) {
+        return true;
       }
+    } else if (freshGrad){
+      if (resultHasFilters(result, ['FRESH_GRAD'])) {
+        return true;
+      }
+    } else if (resultHasFilters(result, filters)) {
+      return true;
     }
+  });
 
-    if (hasFilter) {
-      out.unshift(results[i]);
-    }
-  }
-
-  return out;
+  return filteredResults;
 }
 
 module.exports = filter;
